@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Cloud, Sun, CloudRain, Zap, Wind, Droplets, WindIcon, CloudDrizzle } from 'lucide-react';
+import { Cloud, Sun, CloudRain, Zap, Wind, Droplets, CloudDrizzle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { WeatherData } from '@/types/database';
 import type { AirQualityData } from '@/services/airQuality';

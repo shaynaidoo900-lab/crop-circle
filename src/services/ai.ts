@@ -441,7 +441,7 @@ Format as JSON with the specified structure.`;
 
 function getDefaultFieldAnalysis(
   ndvi: number,
-  healthScore: number,
+  _healthScore: number,
   soilPh: number,
   soilMoisture: number
 ): FieldAnalysis {

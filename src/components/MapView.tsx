@@ -7,7 +7,7 @@ import { useFieldStore, useUIStore } from '@/store';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Field } from '@/types/database';
-import { Layers, MousePointer, Trash2, Check, X } from 'lucide-react';
+import { MousePointer, X } from 'lucide-react';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoidGVzdCIsImEiOiJjbGV4YW1wbGUwIn0.demo';
 
@@ -35,7 +35,7 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
     polygon: null,
   });
   const { mapLayer, setMapLayer } = useUIStore();
-  const { selectedField, addField } = useFieldStore();
+  const { selectedField } = useFieldStore();
 
   // Initialize map
   useEffect(() => {
@@ -306,20 +306,6 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
     }
   }, []);
 
-  // Delete selected field from map
-  const deleteSelectedField = useCallback(() => {
-    if (!selectedField || !draw.current) return;
-
-    // Find and delete the feature
-    const features = draw.current.getAll();
-    const featureToDelete = features.features.find(
-      (f) => f.properties?.id === selectedField.id
-    );
-
-    if (featureToDelete) {
-      draw.current.delete(featureToDelete.id as string);
-    }
-  }, [selectedField]);
 
   // Switch map layer
   const switchLayer = useCallback((layer: 'satellite' | 'ndvi' | 'weather' | 'soil') => {
@@ -328,8 +314,7 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
     if (!map.current) return;
 
     // Toggle layers based on selection
-    const layers = ['fields-fill', 'fields-line'];
-    
+
     // Add or remove NDVI overlay based on layer selection
     if (layer === 'ndvi') {
       // NDVI would be added as a raster overlay here

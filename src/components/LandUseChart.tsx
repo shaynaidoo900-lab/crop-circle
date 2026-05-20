@@ -33,7 +33,6 @@ export function LandUseChart({ landUseData, className }: LandUseChartProps) {
       color: c.color,
     }));
 
-  const totalArea = landUseData.classes.reduce((sum, c) => sum + c.percent, 0);
 
   return (
     <Card className={className}>
@@ -104,7 +103,6 @@ export function LandUseChart({ landUseData, className }: LandUseChartProps) {
               .filter((c) => c.percent > 0)
               .sort((a, b) => b.percent - a.percent)
               .map((landClass) => {
-                const IconComponent = ICON_MAP[landClass.name] || Construction;
                 return (
                   <div key={landClass.name} className="flex items-center gap-2 p-2 rounded hover:bg-muted/50">
                     <div

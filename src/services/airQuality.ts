@@ -27,13 +27,14 @@ export interface ForecastDay {
 }
 
 // WAQI API (uses aqicn.org backend)
-const WAQI_API = 'https://aqicn.org/api';
+// WAQI API endpoint (used in getAirQuality)
+const WAQI_API = 'https://api.waqi.info/'; // eslint-disable-line no-unused-vars
 
 export async function getAirQuality(lat: number, lng: number): Promise<AirQualityData> {
   try {
     // WAQI feed endpoint - returns current air quality data
     const response = await fetch(
-      `https://api.waqi.info/feed/geo:${lat};${lng}/?token=demo` // Token is optional for demo
+      `${WAQI_API}feed/geo:${lat};${lng}/?token=***`
     );
 
     if (!response.ok) {

@@ -41,7 +41,7 @@ const GEE_WMTS_URL = 'https://storage.googleapis.com/ee-landsat-public/EE';
 export async function getLandUseClassification(
   lat: number,
   lng: number,
-  radiusMeters = 1000
+  _radiusMeters = 1000
 ): Promise<LandUseData> {
   try {
     // Use Microsoft Planetary Computer API for land cover data

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Bot, User, Sparkles, Loader2, RefreshCw, Leaf } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   analyzeField,
@@ -12,7 +12,6 @@ import {
   generateFieldLayout,
   type FieldAnalysis,
   type CropRecommendation,
-  type IntercroppingSuggestion,
 } from '@/services/ai';
 import type { SoilData } from '@/types/database';
 
@@ -43,7 +42,6 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export function AIChatWidget({
-  fieldId,
   fieldName,
   soilData,
   ndvi = 0.5,
@@ -62,7 +60,6 @@ export function AIChatWidget({
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [activeAnalysis, setActiveAnalysis] = useState<string>('general');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -139,7 +136,7 @@ export function AIChatWidget({
           healthScore
         );
 
-        const content = `## Field Health Analysis for ${fieldName || 'Your Field'}\n\n**Overall Status:** ${analysis.overallHealth}\n\n**Key Recommendations:**\n${analysis.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')}\n\n**Potential Issues to Monitor:**\n${analysis.potentialIssues.map((p, i) => `• ${p}`).join('\n')}\n\n**Irrigation Advice:** ${analysis.irrigationAdvice}\n\n\n**Fertilization Plan:** ${analysis.fertilizationPlan}`;
+        const content = `## Field Health Analysis for ${fieldName || 'Your Field'}\n\n**Overall Status:** ${analysis.overallHealth}\n\n**Key Recommendations:**\n${analysis.recommendations.map((r, idx) => `${idx + 1}. ${r}`).join('\n')}\n\n**Potential Issues to Monitor:**\n${analysis.potentialIssues.map((p, _i) => `• ${p}`).join('\n')}\n\n**Irrigation Advice:** ${analysis.irrigationAdvice}\n\n\n**Fertilization Plan:** ${analysis.fertilizationPlan}`;
 
         return { content, type: 'field-analysis', data: analysis };
       }
@@ -366,16 +363,16 @@ function FieldAnalysisView({ data }: { data: FieldAnalysis }) {
       <div>
         <p className="font-medium text-xs mb-1">Recommendations:</p>
         <ul className="list-disc list-inside text-xs space-y-0.5">
-          {data.recommendations.slice(0, 3).map((r, i) => (
-            <li key={i}>{r}</li>
+          {data.recommendations.slice(0, 3).map((r, _i) => (
+            <li key={_i}>{r}</li>
           ))}
         </ul>
       </div>
       <div>
         <p className="font-medium text-xs mb-1">Potential Issues:</p>
         <ul className="list-disc list-inside text-xs space-y-0.5">
-          {data.potentialIssues.slice(0, 2).map((p, i) => (
-            <li key={i}>{p}</li>
+          {data.potentialIssues.slice(0, 2).map((p, _i) => (
+            <li key={_i}>{p}</li>
           ))}
         </ul>
       </div>
