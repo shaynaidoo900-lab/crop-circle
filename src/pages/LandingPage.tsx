@@ -115,7 +115,7 @@ export function LandingPage() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate('/login')} className="tap-target">
+            <Button variant="ghost" onClick={() => navigate('/')} className="tap-target">
               Sign In
             </Button>
             <Button onClick={handleGoogleSignIn} className="tap-target">Get Started</Button>
@@ -136,7 +136,7 @@ export function LandingPage() {
             <Link to="#pricing" className="block text-sm font-medium py-2">Pricing</Link>
             <Link to="#about" className="block text-sm font-medium py-2">About</Link>
             <div className="flex flex-col gap-2 pt-4 border-t">
-              <Button variant="outline" onClick={() => navigate('/login')} className="w-full tap-target">Sign In</Button>
+              <Button variant="outline" onClick={() => navigate('/')} className="w-full tap-target">Sign In</Button>
               <Button onClick={handleGoogleSignIn} className="w-full tap-target">Get Started</Button>
             </div>
           </div>
