@@ -27,13 +27,18 @@ function getWeatherIcon(condition: WeatherData['condition']) {
 
 export function WeatherPanel({ weather, currentWeather, airQuality, onAirQualityClick, className }: WeatherPanelProps) {
   const today = currentWeather || weather[0];
-  
+
+  // Loading skeleton state
+  const isLoading = !today;
+
   return (
     <Card className={cn('w-full', className)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-semibold">Weather Forecast</CardTitle>
-          {today && (
+          {isLoading ? (
+            <div className="skeleton w-12 h-4 rounded" />
+          ) : (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Droplets className="w-4 h-4" />
               {today.humidity}%
@@ -41,9 +46,17 @@ export function WeatherPanel({ weather, currentWeather, airQuality, onAirQuality
           )}
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
-        {today && (
+        {isLoading ? (
+          <div className="flex items-center gap-4">
+            <div className="skeleton w-16 h-16 rounded-full" />
+            <div className="space-y-2 flex-1">
+              <div className="skeleton w-20 h-8 rounded" />
+              <div className="skeleton w-16 h-4 rounded" />
+            </div>
+          </div>
+        ) : (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {(() => {
@@ -69,40 +82,64 @@ export function WeatherPanel({ weather, currentWeather, airQuality, onAirQuality
 
         <div className="space-y-2">
           <p className="text-xs font-medium text-muted-foreground">7-Day Forecast</p>
-          <div className="grid grid-cols-7 gap-1">
-            {weather.slice(0, 7).map((day, index) => {
-              const Icon = getWeatherIcon(day.condition);
-              return (
-                <div
-                  key={index}
-                  className="flex flex-col items-center p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                >
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}
-                  </span>
-                  <Icon className="w-5 h-5 my-2 text-amber-500" />
-                  <span className="text-xs font-medium">
-                    {Math.round(day.tempHigh)}°
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {Math.round(day.tempLow)}°
-                  </span>
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1 overflow-x-auto -mx-1 px-1">
+            {isLoading ? (
+              Array.from({ length: 7 }).map((_, i) => (
+                <div key={i} className="flex flex-col items-center p-1.5 sm:p-2 rounded-lg bg-muted/50 space-y-1.5 sm:space-y-2 min-w-[44px]">
+                  <div className="skeleton w-4 h-3 rounded" />
+                  <div className="skeleton w-5 h-5 sm:w-6 sm:h-6 rounded-full" />
+                  <div className="skeleton w-6 h-3 rounded" />
+                  <div className="skeleton w-6 h-3 rounded" />
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              weather.slice(0, 7).map((day, index) => {
+                const Icon = getWeatherIcon(day.condition);
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center p-1.5 sm:p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors min-w-[44px]"
+                  >
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">
+                      {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                    </span>
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 my-1 sm:my-2 text-amber-500" />
+                    <span className="text-[10px] sm:text-xs font-medium">
+                      {Math.round(day.tempHigh)}°
+                    </span>
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">
+                      {Math.round(day.tempLow)}°
+                    </span>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-muted/50 rounded-lg p-3">
-            <p className="text-xs text-muted-foreground">Precipitation</p>
-            <p className="text-lg font-semibold">{today?.precipitation ?? 0}mm</p>
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+              <div className="skeleton w-10 h-3 rounded" />
+              <div className="skeleton w-8 h-6 rounded" />
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+              <div className="skeleton w-10 h-3 rounded" />
+              <div className="skeleton w-8 h-6 rounded" />
+            </div>
           </div>
-          <div className="bg-muted/50 rounded-lg p-3">
-            <p className="text-xs text-muted-foreground">Humidity</p>
-            <p className="text-lg font-semibold">{today?.humidity ?? 0}%</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-muted/50 rounded-lg p-3">
+              <p className="text-xs text-muted-foreground">Precipitation</p>
+              <p className="text-lg font-semibold">{today?.precipitation ?? 0}mm</p>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3">
+              <p className="text-xs text-muted-foreground">Humidity</p>
+              <p className="text-lg font-semibold">{today?.humidity ?? 0}%</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Air Quality Section */}
         {airQuality && (

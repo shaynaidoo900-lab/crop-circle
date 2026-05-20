@@ -303,16 +303,9 @@ export function AIChatWidget({
                 <Bot className="w-4 h-4 text-green-600" />
               </div>
               <div className="bg-muted rounded-lg px-4 py-3">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" />
-                  <div
-                    className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                    style={{ animationDelay: '0.2s' }}
-                  />
-                  <div
-                    className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                    style={{ animationDelay: '0.4s' }}
-                  />
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+                  <span className="text-sm text-muted-foreground">Analyzing your field data...</span>
                 </div>
               </div>
             </div>

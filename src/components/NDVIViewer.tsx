@@ -26,39 +26,66 @@ export function NDVIViewer({ scans, currentScan }: NDVIViewerProps) {
   const ndviColor = getNDVIColor(currentNdvi);
   const ndviLevel = getNDVILevel(currentNdvi);
 
+  const isLoading = scans.length === 0;
+
   return (
     <Card className="w-full">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-semibold">NDVI Analysis</CardTitle>
           <div className="flex items-center gap-2">
-            <div
-              className="w-4 h-4 rounded-full border-2"
-              style={{ backgroundColor: ndviColor }}
-            />
-            <span className="text-sm font-medium">{ndviLevel}</span>
+            {isLoading ? (
+              <div className="skeleton w-4 h-4 rounded-full" />
+            ) : (
+              <>
+                <div
+                  className="w-4 h-4 rounded-full border-2"
+                  style={{ backgroundColor: ndviColor }}
+                />
+                <span className="text-sm font-medium">{ndviLevel}</span>
+              </>
+            )}
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-muted/50 rounded-lg p-3">
-            <p className="text-xs text-muted-foreground">Current NDVI</p>
-            <p className="text-2xl font-bold" style={{ color: ndviColor }}>
-              {currentNdvi.toFixed(3)}
-            </p>
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+              <div className="skeleton w-16 h-3 rounded" />
+              <div className="skeleton w-12 h-8 rounded" />
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+              <div className="skeleton w-16 h-3 rounded" />
+              <div className="skeleton w-12 h-8 rounded" />
+            </div>
           </div>
-          <div className="bg-muted/50 rounded-lg p-3">
-            <p className="text-xs text-muted-foreground">Health Score</p>
-            <p className="text-2xl font-bold" style={{ color: ndviColor }}>
-              {currentScan?.health_score ?? scans[scans.length - 1]?.health_score ?? 0}%
-            </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-muted/50 rounded-lg p-3">
+              <p className="text-xs text-muted-foreground">Current NDVI</p>
+              <p className="text-2xl font-bold" style={{ color: ndviColor }}>
+                {currentNdvi.toFixed(3)}
+              </p>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3">
+              <p className="text-xs text-muted-foreground">Health Score</p>
+              <p className="text-2xl font-bold" style={{ color: ndviColor }}>
+                {currentScan?.health_score ?? scans[scans.length - 1]?.health_score ?? 0}%
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="h-48">
-          {chartData.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="space-y-2 w-full px-4">
+                <div className="skeleton w-full h-32 rounded-lg" />
+              </div>
+            </div>
+          ) : chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />

@@ -25,9 +25,15 @@ export function ReportGenerator({
 }: ReportGeneratorProps) {
   const [reportTitle, setReportTitle] = useState(`Field Report - ${field.name}`);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedPath, setGeneratedPath] = useState<string | null>(null);
+
+  const canGenerate = !!(field && (scan || soilData || (weather && weather.length > 0)));
 
   const generateReport = async () => {
+    if (!canGenerate || isGenerating) return;
+
     setIsGenerating(true);
+    setGeneratedPath(null);
 
     try {
       const doc = new jsPDF();
@@ -266,6 +272,16 @@ export function ReportGenerator({
             </>
           )}
         </Button>
+        {!canGenerate && (
+          <p className="text-xs text-muted-foreground text-center">
+            Add field data to enable report generation
+          </p>
+        )}
+        {generatedPath && !isGenerating && (
+          <p className="text-xs text-green-600 text-center font-medium">
+            Report downloaded successfully!
+          </p>
+        )}
       </CardFooter>
     </Card>
   );
