@@ -18,7 +18,26 @@
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.15 0.03 260);
 
+  --color-amber-400: oklch(0.75 0.15 75);
+  --color-amber-500: oklch(0.7 0.18 75);
+
   --radius: 0.5rem;
+}
+
+/* Typography scale */
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
 }
 
 /* Mapbox overrides */
@@ -31,10 +50,76 @@
   overflow: hidden;
 }
 
-/* PWA safe area padding */
+/* PWA Safe area handling - ensure content doesn't get hidden by notch */
 body {
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+  /* Prevent overscroll bounce on iOS */
+  overscroll-behavior: none;
+}
+
+/* Safe area padding utility classes for mobile */
+.safe-top {
+  padding-top: max(env(safe-area-inset-top), 0.5rem);
+}
+
+.safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+}
+
+/* Minimum 44px tap targets for mobile accessibility */
+@layer utilities {
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Card hover states */
+  .card-hover {
+    @apply transition-all duration-200;
+  }
+  
+  .card-hover:hover {
+    @apply shadow-lg scale-[1.01];
+  }
+  
+  /* Green gradient backgrounds */
+  .bg-field-gradient {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 50%, #86efac 100%);
+  }
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    oklch(0.9 0 0) 25%,
+    oklch(0.85 0 0) 37%,
+    oklch(0.9 0 0) 25%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mobile bottom nav safe area */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

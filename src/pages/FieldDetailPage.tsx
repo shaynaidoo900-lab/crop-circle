@@ -12,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFieldStore } from '@/store';
 import { supabase } from '@/lib/supabase';
 import { formatDate, formatHectares, getHealthScoreColor } from '@/lib/utils';
+import { getWeatherForecast, type WeatherData as WeatherApiData } from '@/services/weather';
+import { getSoilData, type SoilData as SoilApiData } from '@/services/soil';
 import {
   ArrowLeft,
   Calendar,
@@ -20,7 +22,7 @@ import {
   BarChart3,
   Settings,
 } from 'lucide-react';
-import type { Field, FieldScan, SoilData, WeatherData } from '@/types/database';
+import type { Field, FieldScan, WeatherData } from '@/types/database';
 
 export function FieldDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,25 +32,51 @@ export function FieldDetailPage() {
   const [scans, setScans] = useState<FieldScan[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock data for demonstration
-  const [soilData] = useState<SoilData>({
-    ph: 6.8,
-    moisture: 45,
-    nitrogen: 48,
-    phosphorus: 32,
-    potassium: 185,
-    organic_matter: 3.2,
-  });
+  // Real API data states
+  const [weatherApiData, setWeatherApiData] = useState<WeatherApiData | null>(null);
+  const [soilApiData, setSoilApiData] = useState<SoilApiData | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [soilLoading, setSoilLoading] = useState(false);
 
-  const [weather] = useState<WeatherData[]>([
-    { date: '2024-01-20', tempHigh: 18, tempLow: 8, precipitation: 2, humidity: 65, condition: 'sunny' },
-    { date: '2024-01-21', tempHigh: 16, tempLow: 6, precipitation: 5, humidity: 72, condition: 'cloudy' },
-    { date: '2024-01-22', tempHigh: 14, tempLow: 5, precipitation: 8, humidity: 80, condition: 'rainy' },
-    { date: '2024-01-23', tempHigh: 15, tempLow: 7, precipitation: 3, humidity: 68, condition: 'cloudy' },
-    { date: '2024-01-24', tempHigh: 19, tempLow: 9, precipitation: 0, humidity: 55, condition: 'sunny' },
-    { date: '2024-01-25', tempHigh: 21, tempLow: 11, precipitation: 0, humidity: 50, condition: 'sunny' },
-    { date: '2024-01-26', tempHigh: 20, tempLow: 10, precipitation: 1, humidity: 58, condition: 'cloudy' },
-  ]);
+  // Extract centroid from field boundary
+  const getFieldCentroid = (boundary: GeoJSON.Polygon): [number, number] => {
+    const coords = boundary.coordinates[0];
+    let lngSum = 0;
+    let latSum = 0;
+    const n = coords.length - 1; // Exclude closing point
+    for (let i = 0; i < n; i++) {
+      lngSum += coords[i][0];
+      latSum += coords[i][1];
+    }
+    return [lngSum / n, latSum / n];
+  };
+
+  // Load weather and soil data for field
+  const loadExternalData = async (f: Field) => {
+    const [lng, lat] = getFieldCentroid(f.boundary);
+
+    // Load weather data
+    setWeatherLoading(true);
+    try {
+      const weather = await getWeatherForecast(lat, lng);
+      setWeatherApiData(weather);
+    } catch (error) {
+      console.error('Error loading weather:', error);
+    } finally {
+      setWeatherLoading(false);
+    }
+
+    // Load soil data
+    setSoilLoading(true);
+    try {
+      const soil = await getSoilData(lat, lng);
+      setSoilApiData(soil);
+    } catch (error) {
+      console.error('Error loading soil:', error);
+    } finally {
+      setSoilLoading(false);
+    }
+  };
 
   useEffect(() => {
     const loadFieldData = async () => {
@@ -72,7 +100,6 @@ export function FieldDetailPage() {
           setScans(scansData || []);
         } catch (error) {
           console.error('Error loading scans:', error);
-          // Use mock data if no real data
           setScans([
             {
               id: '1',
@@ -172,6 +199,13 @@ export function FieldDetailPage() {
     loadFieldData();
   }, [id, fields, setFields, setSelectedField]);
 
+  // Load external data when field is available
+  useEffect(() => {
+    if (field) {
+      loadExternalData(field);
+    }
+  }, [field]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -193,6 +227,33 @@ export function FieldDetailPage() {
   }
 
   const latestScan = scans[0];
+
+  // Convert weather API data to component format
+  const weatherForecast: WeatherData[] = weatherApiData?.forecast.map((day) => {
+    let condition: WeatherData['condition'] = 'cloudy';
+    if (day.condition === 'sunny' || day.condition === 'cloudy' || day.condition === 'rainy' || day.condition === 'stormy') {
+      condition = day.condition;
+    }
+    return {
+      date: day.date,
+      tempHigh: day.tempHigh,
+      tempLow: day.tempLow,
+      precipitation: day.precipitation,
+      humidity: day.humidity,
+      condition,
+    };
+  }) || [];
+
+  const currentWeather: WeatherData | undefined = weatherApiData?.current ? {
+    date: weatherApiData.forecast[0]?.date || new Date().toISOString().split('T')[0],
+    tempHigh: weatherApiData.current.temp + 5,
+    tempLow: weatherApiData.current.temp - 5,
+    precipitation: weatherApiData.forecast[0]?.precipitation || 0,
+    humidity: weatherApiData.current.humidity,
+    condition: (['sunny', 'cloudy', 'rainy', 'stormy'].includes(weatherApiData.current.condition)
+      ? weatherApiData.current.condition
+      : 'cloudy') as WeatherData['condition'],
+  } : undefined;
 
   return (
     <div className="min-h-screen bg-background">
@@ -313,13 +374,30 @@ export function FieldDetailPage() {
                 </Card>
               )}
 
-              {/* Weather Summary */}
-              <WeatherPanel weather={weather} currentWeather={weather[0]} />
+              {/* Weather Summary - uses live Open-Meteo data */}
+              {!weatherLoading && weatherForecast.length > 0 ? (
+                <WeatherPanel weather={weatherForecast} currentWeather={currentWeather} />
+              ) : (
+                <Card>
+                  <CardContent className="p-4 text-center text-muted-foreground">
+                    {weatherLoading ? 'Loading weather data...' : 'Weather data unavailable'}
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="analysis" className="p-4 space-y-4">
               <NDVIViewer scans={scans} currentScan={latestScan} />
-              <SoilChart soilData={soilData} />
+              {/* SoilChart - uses live ISRIC SoilGrids data */}
+              {!soilLoading && soilApiData ? (
+                <SoilChart soilData={soilApiData} />
+              ) : (
+                <Card>
+                  <CardContent className="p-4 text-center text-muted-foreground">
+                    {soilLoading ? 'Loading soil data...' : 'Soil data unavailable'}
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="ai" className="p-4 h-full">
@@ -330,8 +408,8 @@ export function FieldDetailPage() {
               <ReportGenerator
                 field={field}
                 scan={latestScan}
-                soilData={soilData}
-                weather={weather}
+                soilData={soilApiData ?? undefined}
+                weather={weatherForecast}
               />
             </TabsContent>
           </Tabs>

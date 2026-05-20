@@ -1,15 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import { useFieldStore, useUIStore } from '@/store';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Field } from '@/types/database';
 import { MousePointer, X } from 'lucide-react';
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoidGVzdCIsImEiOiJjbGV4YW1wbGUwIn0.demo';
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ij...demo';
 
 interface MapViewProps {
   fields: Field[];
@@ -26,8 +23,6 @@ interface DrawingState {
 
 export function MapView({ fields, onFieldSelect, onFieldCreate, className }: MapViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const draw = useRef<MapboxDraw | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [drawingState, setDrawingState] = useState<DrawingState>({
     isDrawing: false,
@@ -36,111 +31,129 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
   });
   const { mapLayer, setMapLayer } = useUIStore();
   const { selectedField } = useFieldStore();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const drawRef = useRef<any>(null);
 
-  // Initialize map
+  // Load mapbox-gl dynamically on first render to avoid chunk size warning
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    let isMounted = true;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    const initMap = async () => {
+      if (!mapContainer.current || mapRef.current || !isMounted) return;
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
-      center: [-98.5795, 39.8283],
-      zoom: 4,
-    });
+      try {
+        const mapboxgl = (await import('mapbox-gl')).default;
+        const MapboxDraw = (await import('@mapbox/mapbox-gl-draw')).default;
+        
+        // Import CSS
+        await import('mapbox-gl/dist/mapbox-gl.css');
+        await import('@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css');
 
-    // Initialize Mapbox Draw
-    draw.current = new MapboxDraw({
-      displayControlsDefault: false,
-      controls: {
-        polygon: false,
-        trash: false,
-        point: false,
-        line: false,
-        combine_features: false,
-        uncombine_features: false,
-      },
-      defaultMode: 'simple_select',
-      styles: [
-        // Polygon fill
-        {
-          id: 'gl-draw-polygon-fill',
-          type: 'fill',
-          filter: ['all', ['==', '$type', 'Polygon']],
-          paint: {
-            'fill-color': '#22c55e',
-            'fill-opacity': 0.3,
+        mapboxgl.accessToken = MAPBOX_TOKEN;
+
+        const map = new mapboxgl.Map({
+          container: mapContainer.current,
+          style: 'mapbox://styles/mapbox/satellite-streets-v12',
+          center: [-98.5795, 39.8283],
+          zoom: 4,
+        });
+
+        const draw = new MapboxDraw({
+          displayControlsDefault: false,
+          controls: {
+            polygon: false,
+            trash: false,
+            point: false,
+            line: false,
+            combine_features: false,
+            uncombine_features: false,
           },
-        },
-        // Polygon stroke
-        {
-          id: 'gl-draw-polygon-stroke',
-          type: 'line',
-          filter: ['all', ['==', '$type', 'Polygon']],
-          paint: {
-            'line-color': '#166534',
-            'line-width': 2,
-          },
-        },
-        // Vertex points
-        {
-          id: 'gl-draw-polygon-and-line-vertex-active',
-          type: 'circle',
-          filter: ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point']],
-          paint: {
-            'circle-radius': 6,
-            'circle-color': '#22c55e',
-            'circle-stroke-color': '#fff',
-            'circle-stroke-width': 2,
-          },
-        },
-        // Midpoints
-        {
-          id: 'gl-draw-polygon-midpoint',
-          type: 'circle',
-          filter: ['all', ['==', 'meta', 'midpoint'], ['==', '$type', 'Point']],
-          paint: {
-            'circle-radius': 4,
-            'circle-color': '#22c55e',
-          },
-        },
-      ],
-    });
+          defaultMode: 'simple_select',
+          styles: [
+            {
+              id: 'gl-draw-polygon-fill',
+              type: 'fill',
+              filter: ['all', ['==', '$type', 'Polygon']],
+              paint: {
+                'fill-color': '#22c55e',
+                'fill-opacity': 0.3,
+              },
+            },
+            {
+              id: 'gl-draw-polygon-stroke',
+              type: 'line',
+              filter: ['all', ['==', '$type', 'Polygon']],
+              paint: {
+                'line-color': '#166534',
+                'line-width': 2,
+              },
+            },
+            {
+              id: 'gl-draw-polygon-and-line-vertex-active',
+              type: 'circle',
+              filter: ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point']],
+              paint: {
+                'circle-radius': 6,
+                'circle-color': '#22c55e',
+                'circle-stroke-color': '#fff',
+                'circle-stroke-width': 2,
+              },
+            },
+            {
+              id: 'gl-draw-polygon-midpoint',
+              type: 'circle',
+              filter: ['all', ['==', 'meta', 'midpoint'], ['==', '$type', 'Point']],
+              paint: {
+                'circle-radius': 4,
+                'circle-color': '#22c55e',
+              },
+            },
+          ],
+        });
 
-    map.current.addControl(draw.current);
+        map.addControl(draw);
+        map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        map.on('load', () => {
+          if (isMounted) setMapLoaded(true);
+        });
 
-    map.current.on('load', () => {
-      setMapLoaded(true);
-    });
+        mapRef.current = map;
+        drawRef.current = draw;
+      } catch (error) {
+        console.error('Error loading map:', error);
+      }
+    };
+
+    initMap();
 
     return () => {
-      if (draw.current) {
-        draw.current.deleteAll();
+      isMounted = false;
+      if (drawRef.current) {
+        drawRef.current.deleteAll();
       }
-      if (map.current) {
-        map.current.remove();
+      if (mapRef.current) {
+        mapRef.current.remove();
       }
-      map.current = null;
+      mapRef.current = null;
     };
   }, []);
 
   // Render field polygons
   useEffect(() => {
-    if (!map.current || !mapLoaded || fields.length === 0) return;
+    if (!mapRef.current || !mapLoaded || fields.length === 0) return;
 
+    const map = mapRef.current;
     const sourceId = 'fields-source';
     const fillId = 'fields-fill';
     const lineId = 'fields-line';
 
-    // Remove existing layers and source
-    if (map.current.getLayer(fillId)) map.current.removeLayer(fillId);
-    if (map.current.getLayer(lineId)) map.current.removeLayer(lineId);
-    if (map.current.getSource(sourceId)) map.current.removeSource(sourceId);
+    if (map.getLayer(fillId)) map.removeLayer(fillId);
+    if (map.getLayer(lineId)) map.removeLayer(lineId);
+    if (map.getSource(sourceId)) map.removeSource(sourceId);
 
-    // Create GeoJSON from fields
     const geojson: GeoJSON.FeatureCollection = {
       type: 'FeatureCollection',
       features: fields.map((field) => ({
@@ -150,14 +163,12 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
       })),
     };
 
-    // Add source
-    map.current.addSource(sourceId, {
+    map.addSource(sourceId, {
       type: 'geojson',
       data: geojson,
     });
 
-    // Add fill layer
-    map.current.addLayer({
+    map.addLayer({
       id: fillId,
       type: 'fill',
       source: sourceId,
@@ -172,8 +183,7 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
       },
     });
 
-    // Add line layer
-    map.current.addLayer({
+    map.addLayer({
       id: lineId,
       type: 'line',
       source: sourceId,
@@ -183,8 +193,7 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
       },
     });
 
-    // Click handler for field selection
-    map.current.on('click', fillId, (e) => {
+    map.on('click', fillId, (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
       if (e.features && e.features[0]) {
         const fieldId = e.features[0].properties?.id;
         const field = fields.find((f) => f.id === fieldId);
@@ -194,49 +203,43 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
       }
     });
 
-    // Change cursor on hover
-    map.current.on('mouseenter', fillId, () => {
-      if (map.current) {
-        map.current.getCanvas().style.cursor = 'pointer';
-      }
+    map.on('mouseenter', fillId, () => {
+      map.getCanvas().style.cursor = 'pointer';
     });
 
-    map.current.on('mouseleave', fillId, () => {
-      if (map.current) {
-        map.current.getCanvas().style.cursor = '';
-      }
+    map.on('mouseleave', fillId, () => {
+      map.getCanvas().style.cursor = '';
     });
 
-    // Fit bounds if single field
     if (fields.length === 1) {
       const bounds = new mapboxgl.LngLatBounds();
       geojson.features.forEach((feature) => {
         if (feature.geometry.type === 'Polygon') {
-          feature.geometry.coordinates[0].forEach((coord) => {
+          feature.geometry.coordinates[0].forEach((coord: number[]) => {
             bounds.extend(coord as [number, number]);
           });
         }
       });
-      map.current.fitBounds(bounds, { padding: 100, maxZoom: 15 });
+      map.fitBounds(bounds, { padding: 100, maxZoom: 15 });
     }
   }, [fields, selectedField, mapLoaded, onFieldSelect]);
 
-  // Handle drawing mode changes
+  // Handle drawing mode
   useEffect(() => {
-    if (!draw.current || !map.current) return;
+    if (!drawRef.current || !mapRef.current) return;
 
     if (drawingState.isDrawing) {
-      draw.current.changeMode('draw_polygon');
-      map.current.getCanvas().style.cursor = 'crosshair';
+      drawRef.current.changeMode('draw_polygon');
+      mapRef.current.getCanvas().style.cursor = 'crosshair';
     } else {
-      draw.current.changeMode('simple_select');
-      map.current.getCanvas().style.cursor = '';
+      drawRef.current.changeMode('simple_select');
+      mapRef.current.getCanvas().style.cursor = '';
     }
   }, [drawingState.isDrawing]);
 
-  // Listen for draw create event
+  // Listen for draw events
   useEffect(() => {
-    if (!map.current || !draw.current) return;
+    if (!mapRef.current || !drawRef.current) return;
 
     const handleDrawCreate = (e: { features: GeoJSON.Feature[] }) => {
       if (e.features && e.features.length > 0) {
@@ -271,16 +274,15 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
       }
     };
 
-    map.current.on('draw.create', handleDrawCreate);
-    map.current.on('draw.update', handleDrawUpdate);
+    mapRef.current.on('draw.create', handleDrawCreate);
+    mapRef.current.on('draw.update', handleDrawUpdate);
 
     return () => {
-      map.current?.off('draw.create', handleDrawCreate);
-      map.current?.off('draw.update', handleDrawUpdate);
+      mapRef.current?.off('draw.create', handleDrawCreate);
+      mapRef.current?.off('draw.update', handleDrawUpdate);
     };
   }, [mapLoaded, onFieldCreate]);
 
-  // Start drawing new field
   const startDrawing = useCallback(() => {
     setDrawingState({
       isDrawing: true,
@@ -288,12 +290,11 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
       polygon: null,
     });
 
-    if (draw.current) {
-      draw.current.deleteAll();
+    if (drawRef.current) {
+      drawRef.current.deleteAll();
     }
   }, []);
 
-  // Cancel drawing
   const cancelDrawing = useCallback(() => {
     setDrawingState({
       isDrawing: false,
@@ -301,26 +302,18 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
       polygon: null,
     });
 
-    if (draw.current) {
-      draw.current.deleteAll();
+    if (drawRef.current) {
+      drawRef.current.deleteAll();
     }
   }, []);
 
-
-  // Switch map layer
   const switchLayer = useCallback((layer: 'satellite' | 'ndvi' | 'weather' | 'soil') => {
     setMapLayer(layer);
 
-    if (!map.current) return;
+    if (!mapRef.current) return;
 
-    // Toggle layers based on selection
-
-    // Add or remove NDVI overlay based on layer selection
-    if (layer === 'ndvi') {
-      // NDVI would be added as a raster overlay here
-      // For now, just update the style
-    } else if (layer === 'satellite') {
-      map.current.setStyle('mapbox://styles/mapbox/satellite-streets-v12');
+    if (layer === 'satellite') {
+      mapRef.current.setStyle('mapbox://styles/mapbox/satellite-streets-v12');
     }
   }, [setMapLayer]);
 
@@ -402,7 +395,7 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
         </div>
       )}
 
-      {/* Legend for selected layer */}
+      {/* NDVI Legend */}
       {mapLayer === 'ndvi' && (
         <div className="absolute bottom-4 right-4 bg-background/95 backdrop-blur p-3 rounded-lg border shadow-lg z-10">
           <p className="text-sm font-medium mb-2">NDVI Legend</p>
@@ -430,13 +423,10 @@ export function MapView({ fields, onFieldSelect, onFieldCreate, className }: Map
   );
 }
 
-// Calculate polygon area in hectares using the Shoelace formula
 function calculatePolygonArea(polygon: GeoJSON.Polygon): number {
   const coordinates = polygon.coordinates[0];
   if (coordinates.length < 4) return 0;
 
-  // Convert to a local coordinate system (meters)
-  // Using a simplified approach for small areas
   let area = 0;
   const n = coordinates.length;
 
@@ -444,7 +434,6 @@ function calculatePolygonArea(polygon: GeoJSON.Polygon): number {
     const [lng1, lat1] = coordinates[i];
     const [lng2, lat2] = coordinates[i + 1];
     
-    // Convert to approximate meters
     const x1 = lng1 * 111320 * Math.cos((lat1 * Math.PI) / 180);
     const y1 = lat1 * 110540;
     const x2 = lng2 * 111320 * Math.cos((lat2 * Math.PI) / 180);
@@ -454,10 +443,7 @@ function calculatePolygonArea(polygon: GeoJSON.Polygon): number {
   }
 
   area = Math.abs(area) / 2;
-
-  // Convert square meters to hectares
   return area / 10000;
 }
 
-// Export for use elsewhere
 export { calculatePolygonArea };

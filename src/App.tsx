@@ -6,6 +6,7 @@ import { FieldsPage } from '@/pages/FieldsPage';
 import { FieldDetailPage } from '@/pages/FieldDetailPage';
 import { AIInsightsPage } from '@/pages/AIInsightsPage';
 import { ReportsPage } from '@/pages/ReportsPage';
+import { MobileNav } from '@/components/MobileNav';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/store';
 import './index.css';
@@ -43,6 +44,8 @@ function App() {
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      {/* Mobile bottom navigation - shows on authenticated pages */}
+      <MobileNav />
     </BrowserRouter>
   );
 }

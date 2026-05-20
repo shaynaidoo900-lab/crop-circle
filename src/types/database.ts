@@ -41,7 +41,7 @@ export interface WeatherData {
   tempLow: number;
   precipitation: number;
   humidity: number;
-  condition: 'sunny' | 'cloudy' | 'rainy' | 'stormy';
+  condition: 'sunny' | 'cloudy' | 'rainy' | 'stormy' | 'snowy';
 }
 
 export interface SoilData {

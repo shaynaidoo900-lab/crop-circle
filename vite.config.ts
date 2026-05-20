@@ -14,7 +14,7 @@ export default defineConfig({
       manifest: {
         name: 'Crop Circle',
         short_name: 'CropCircle',
-        description: 'Agricultural crop and environmental monitoring platform',
+        description: 'Agricultural crop and environmental monitoring platform with AI-assisted analysis',
         theme_color: '#22c55e',
         background_color: '#ffffff',
         display: 'standalone',
@@ -23,10 +23,32 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/favicon.svg',
+            src: '/pwa-192.png',
             sizes: '192x192',
-            type: 'image/svg+xml',
-            purpose: 'any maskable',
+            type: 'image/png',
+          },
+          {
+            src: '/pwa-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+          },
+          {
+            src: '/icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/maskable-icon.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
           },
         ],
       },

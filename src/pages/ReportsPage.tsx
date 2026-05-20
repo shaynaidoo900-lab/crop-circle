@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useFieldStore } from '@/store';
+import { supabase } from '@/lib/supabase';
 import { formatDate, formatHectares, getHealthScoreColor } from '@/lib/utils';
 import { FileText, Search, Download, Calendar, MapPin, Plus } from 'lucide-react';
 import type { Field } from '@/types/database';
@@ -66,9 +67,9 @@ export function ReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-50">
+      <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-50 safe-top">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
@@ -77,7 +78,7 @@ export function ReportsPage() {
                 Generate and manage field analysis reports
               </p>
             </div>
-            <Button onClick={() => navigate('/fields/new')}>
+            <Button onClick={() => navigate('/fields/new')} className="tap-target">
               <Plus className="w-4 h-4 mr-2" />
               New Field
             </Button>
@@ -113,7 +114,7 @@ export function ReportsPage() {
                       fields.map((field) => (
                         <Card
                           key={field.id}
-                          className={`cursor-pointer transition-colors ${
+                          className={`cursor-pointer transition-colors tap-target ${
                             selectedField?.id === field.id ? 'border-green-600 ring-1 ring-green-600' : ''
                           }`}
                           onClick={() => setSelectedField(field)}
@@ -232,6 +233,3 @@ export function ReportsPage() {
     </div>
   );
 }
-
-// Need to import supabase
-import { supabase } from '@/lib/supabase';
