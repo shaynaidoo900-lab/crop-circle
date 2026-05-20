@@ -1,16 +1,15 @@
 -- ================================================
 -- Crop Circle — Supabase Schema
--- Run this in Supabase SQL Editor
 -- ================================================
 
--- Enable UUID extension
+-- Enable UUID extension (provides gen_random_uuid)
 create extension if not exists "uuid-ossp";
 
 -- ================================================
 -- PROFILES
 -- ================================================
 create table public.profiles (
-  id uuid references auth.users on delete cascade primary key default uuid_generate_v4(),
+  id uuid references auth.users on delete cascade primary key default gen_random_uuid(),
   email text unique not null,
   name text,
   subscription_tier text not null default 'free' check (subscription_tier in ('free', 'pro', 'enterprise')),
@@ -45,7 +44,7 @@ create trigger on_auth_user_created
 -- FIELDS
 -- ================================================
 create table public.fields (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles on delete cascade not null,
   name text not null,
   boundary jsonb not null, -- GeoJSON Polygon
@@ -63,7 +62,7 @@ create policy "Users can delete own fields" on public.fields for delete using (a
 -- FIELD SCANS
 -- ================================================
 create table public.field_scans (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   field_id uuid references public.fields on delete cascade not null,
   scan_date timestamptz not null default now(),
   satellite_source text,
@@ -87,7 +86,7 @@ create policy "Users can insert own field scans" on public.field_scans
 -- AI INSIGHTS
 -- ================================================
 create table public.ai_insights (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   field_id uuid references public.fields on delete cascade not null,
   generated_at timestamptz not null default now(),
   insight_text text not null,
