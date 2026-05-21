@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { getNDVIColor, getNDVILevel } from '@/lib/utils';
 import type { FieldScan } from '@/types/database';
-
 interface NDVIViewerProps {
   scans: FieldScan[];
   currentScan?: FieldScan;
@@ -117,8 +116,16 @@ export function NDVIViewer({ scans, currentScan }: NDVIViewerProps) {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              No scan data available
+            <div className="flex flex-col items-center justify-center h-full text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">No scan data available</p>
+                <p className="text-xs text-muted-foreground mt-1">Satellite scans will appear here once your field is monitored</p>
+              </div>
             </div>
           )}
         </div>
