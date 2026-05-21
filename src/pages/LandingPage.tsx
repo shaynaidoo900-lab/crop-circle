@@ -161,7 +161,7 @@ export function LandingPage() {
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
               Monitor Your Fields with
-              <span className="bg-gradient-to-r from-green-600 via-green-500 to-green-700 bg-clip-text text-transparent"> Precision Agriculture</span>
+              <span className="bg-gradient-to-r from-green-600 via-green-500 to-emerald-600 bg-clip-text text-transparent"> Precision Farming</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Crop Circle brings satellite imagery, AI analytics, and real-time weather data
@@ -179,11 +179,11 @@ export function LandingPage() {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button size="lg" onClick={handleGoogleSignIn} className="gap-2 tap-target text-base px-8 h-14 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg shadow-green-600/25">
+              <Button size="lg" onClick={handleGoogleSignIn} className="gap-2 tap-target text-base px-8 h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg shadow-green-600/30 hover:shadow-xl hover:shadow-green-600/40 transition-all duration-200 hover:scale-105">
                 Start Free Trial
                 <ArrowRight className="w-5 h-5" />
               </Button>
-              <Button size="lg" variant="outline" className="gap-2 tap-target text-base px-8 h-14">
+              <Button size="lg" variant="outline" className="gap-2 tap-target text-base px-8 h-14 border-2 hover:bg-green-50 hover:border-green-300 transition-all duration-200">
                 Watch Demo
               </Button>
             </div>
@@ -202,12 +202,12 @@ export function LandingPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature) => (
-              <Card key={feature.title} className="card-hover border-green-100 hover:border-green-300">
+              <Card key={feature.title} className="card-hover border-green-100 hover:border-green-300 hover:shadow-lg hover:shadow-green-600/10 transition-all duration-300 group hover:-translate-y-1">
                 <CardHeader className="p-6 pb-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mb-4 shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mb-4 shadow-sm group-hover:shadow-md group-hover:scale-110 transition-all duration-300">
                     <feature.icon className="w-7 h-7 text-green-700" />
                   </div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  <CardTitle className="text-lg font-bold">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-base">{feature.description}</CardDescription>

@@ -6,25 +6,23 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Clean crop circle logo: concentric rings with healthy crop center
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
-  <!-- Outer field circle -->
-  <circle cx="96" cy="96" r="88" fill="#22c55e"/>
-  <!-- Dark outer ring -->
-  <circle cx="96" cy="96" r="88" fill="none" stroke="#166534" stroke-width="4"/>
-  <!-- Concentric crop rings -->
-  <circle cx="96" cy="96" r="70" fill="none" stroke="#bbf7d0" stroke-width="8" stroke-opacity="0.7"/>
-  <circle cx="96" cy="96" r="54" fill="none" stroke="#86efac" stroke-width="7" stroke-opacity="0.8"/>
-  <circle cx="96" cy="96" r="38" fill="none" stroke="#4ade80" stroke-width="6" stroke-opacity="0.9"/>
-  <circle cx="96" cy="96" r="22" fill="none" stroke="#22c55e" stroke-width="5"/>
-  <!-- Center healthy crop -->
-  <circle cx="96" cy="96" r="12" fill="#16a34a"/>
-  <circle cx="96" cy="96" r="6" fill="#dcfce7"/>
-  <!-- Leaf accents -->
-  <circle cx="96" cy="16" r="4" fill="#bbf7d0" opacity="0.8"/>
-  <circle cx="96" cy="176" r="4" fill="#bbf7d0" opacity="0.8"/>
-  <circle cx="16" cy="96" r="4" fill="#bbf7d0" opacity="0.8"/>
-  <circle cx="176" cy="96" r="4" fill="#bbf7d0" opacity="0.8"/>
-  <!-- Earth tone arc -->
-  <path d="M40 156 Q96 144 152 156" stroke="#a16207" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.5"/>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </linearGradient>
+    <linearGradient id="ring1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86efac"/>
+      <stop offset="100%" stop-color="#4ade80"/>
+    </linearGradient>
+  </defs>
+  <circle cx="96" cy="96" r="90" fill="url(#bg)"/>
+  <circle cx="96" cy="96" r="82" fill="none" stroke="#166534" stroke-width="2.5" stroke-opacity="0.6"/>
+  <circle cx="96" cy="96" r="62" fill="none" stroke="url(#ring1)" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="96" cy="96" r="38" fill="none" stroke="#4ade80" stroke-width="5" stroke-opacity="0.75" stroke-linecap="round"/>
+  <circle cx="96" cy="96" r="12" fill="#166534"/>
+  <circle cx="96" cy="96" r="5" fill="#ffffff"/>
+  <path d="M46 150 Q96 142 146 150" stroke="#a3a3a3" stroke-width="4" stroke-linecap="round" fill="none" stroke-opacity="0.35"/>
 </svg>`;
 
 const sizes = [
