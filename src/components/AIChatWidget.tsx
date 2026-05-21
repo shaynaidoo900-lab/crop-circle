@@ -302,10 +302,16 @@ export function AIChatWidget({
               <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-green-600" />
               </div>
-              <div className="bg-muted rounded-lg px-4 py-3">
+              <div className="bg-muted rounded-lg px-4 py-3 space-y-2">
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-green-600" />
-                  <span className="text-sm text-muted-foreground">Analyzing your field data...</span>
+                  <span className="text-sm font-medium text-green-700">Analyzing your field data...</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="h-1.5 w-24 bg-green-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500 rounded-full animate-pulse" style={{ width: '60%' }} />
+                  </div>
+                  <span className="text-xs text-muted-foreground">Processing</span>
                 </div>
               </div>
             </div>

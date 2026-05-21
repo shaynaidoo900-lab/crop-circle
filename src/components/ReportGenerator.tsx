@@ -240,12 +240,24 @@ export function ReportGenerator({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Report preview indicator */}
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100">
+          <div className="flex items-center gap-2 mb-2">
+            <FileText className="w-4 h-4 text-green-600" />
+            <span className="text-sm font-medium text-green-700">PDF Report</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Includes field info, health summary, soil analysis, and weather data
+          </p>
+        </div>
+
         <div className="space-y-2">
           <label className="text-sm font-medium">Report Title</label>
           <Input
             value={reportTitle}
             onChange={(e) => setReportTitle(e.target.value)}
             placeholder="Enter report title"
+            className="border-green-100 focus:border-green-500"
           />
         </div>
         <div className="text-sm text-muted-foreground">
@@ -258,17 +270,17 @@ export function ReportGenerator({
           </ul>
         </div>
       </CardContent>
-      <CardFooter>
-        <Button onClick={generateReport} disabled={isGenerating} className="w-full">
+      <CardFooter className="flex flex-col gap-3">
+        <Button onClick={generateReport} disabled={isGenerating} className="w-full bg-green-600 hover:bg-green-700">
           {isGenerating ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Generating...
+              <span className="ml-2">Generating PDF...</span>
             </>
           ) : (
             <>
               <Download className="w-4 h-4" />
-              Download PDF
+              <span className="ml-2">Download PDF Report</span>
             </>
           )}
         </Button>
